@@ -72,10 +72,10 @@ namespace aspApi
                 };
             });
 
-            services.AddTransient<IUserRepository, UserRepository>();
-            services.AddTransient<IPhoneRepository, PhoneRepository>();
-            // services.AddScoped<IUserRepository, UserRepository>();
-            // services.AddScoped<IPhoneRepository, PhoneRepository> ();
+            //services.AddTransient<IUserRepository, UserRepository>();
+            //services.AddTransient<IPhoneRepository, PhoneRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IPhoneRepository, PhoneRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

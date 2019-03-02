@@ -16,8 +16,8 @@ namespace aspApi.Repositories
 
     User Authenticate(string email);
 
-    void Remove(long id);
+    void Remove(int id);
 
-    void UpdateAsync(User user);
+    void Update(User user);
 }
 }

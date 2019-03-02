@@ -1,5 +1,6 @@
 ﻿using aspApi.Models;
 using aspApi.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -9,62 +10,60 @@ using System.Threading.Tasks;
 namespace aspApi.Controllers
 {
 
-[Route("users/")]
-public class UserController : Controller
-{
-
-    private readonly IUserRepository _userRepository;
-    private AppResponse appResponse;
-
-    public UserController(IUserRepository userRepository)
+    [Route("users/")]
+    public class UserController : Controller
     {
-        _userRepository = userRepository;
-    }
 
-    [HttpGet]
-    public IEnumerable<User> GetAll()
-    {
-        return _userRepository.GetAll();
-    }
+        private readonly IUserRepository _userRepository;
+        private AppResponse appResponse;
 
-    [HttpGet("{id}", Name = "GetUser")]
-    public IActionResult GetById(int id)
-    {
-        var user = _userRepository.Find(id);
-
-
-        if (user == null)
+        public UserController(IUserRepository userRepository)
         {
-            return NotFound();
+            _userRepository = userRepository;
         }
 
-        appResponse = new AppResponse("Welcome to your profile!", user, true);
+        [HttpGet, Authorize]
+        public IEnumerable<User> GetAll()
+        {
+            return _userRepository.GetAll();
+        }
 
-        return new ObjectResult(appResponse);
-    }
-
-    [HttpPost]
-    public IActionResult Create([FromBody] User user) {
-
-        if (user == null) return BadRequest();
-
-        _userRepository.Add(user);
-
-        appResponse = new AppResponse("User created", null, true);
-
-        return new ObjectResult(appResponse);
-
-    }
-
-    [HttpPut]
-    public IActionResult Update([FromBody] User user)
-    {
-
-       
+        [HttpGet("{id}", Name = "GetUser")]
+        public IActionResult GetById(int id)
+        {
+            var user = _userRepository.Find(id);
 
 
-        try{
+            if (user == null)
+            {
+                return NotFound();
+            }
 
+            appResponse = new AppResponse("Welcome to your profile!", user, true);
+
+            return new ObjectResult(appResponse);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public IActionResult Create([FromBody] User user)
+        {
+
+            if (user == null) return BadRequest();
+
+            _userRepository.Add(user);
+
+            appResponse = new AppResponse("Welcome to Your Profile", null, true);
+
+            return new ObjectResult(appResponse);
+
+        }
+
+        [HttpPut, Authorize]
+        public IActionResult Update([FromBody] User user)
+        {
+            try
+            {
                 var _user = _userRepository.Find(user.id);
                 if (_user == null) return NotFound();
 
@@ -74,34 +73,34 @@ public class UserController : Controller
                 _user.BirthDate = user.BirthDate;
                 _user.updatedAt = DateTimeOffset.Now;
                 _user.address = user.address;
-                _userRepository.UpdateAsync(_user);
+                _userRepository.Update(_user);
 
-        appResponse = new AppResponse("Profile Updated!", null, true);
-        return new ObjectResult(appResponse);
+                appResponse = new AppResponse("Profile Updated!", null, true);
+                return new ObjectResult(appResponse);
 
-        }catch(Exception e){
-        appResponse = new AppResponse("Oops.. An Error Occurred!", e, true);
-        return StatusCode(500);
+            }
+            catch (Exception e)
+            {
+                appResponse = new AppResponse("Oops.. An Error Occurred!", e, true);
+                return StatusCode(500);
+            }
         }
 
+        [HttpDelete("{id}"), Authorize]
+        public IActionResult Delete(int id)
+        {
 
+            var _user = _userRepository.Find(id);
+
+
+            if (_user == null) return NotFound();
+
+            _userRepository.Remove(id);
+
+            appResponse = new AppResponse("User Deleted!", null, true);
+
+            return new ObjectResult(appResponse);
+
+        }
     }
-
-    [HttpDelete("{id}")]
-    public IActionResult Delete(int id)
-    {
-
-        var _user = _userRepository.Find(id);
-
-
-        if (_user == null) return NotFound();
-
-        _userRepository.Remove(id);
-
-        appResponse = new AppResponse("User Deleted!", null, true);
-
-        return new ObjectResult(appResponse);
-
-    }
-}
 }
