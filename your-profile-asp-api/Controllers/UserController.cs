@@ -94,7 +94,32 @@ namespace aspApi.Controllers
             }
         }
 
+        [HttpPost("updatePassword/")]
+        [Route("updatePassword/")]
+        public ActionResult ResetPassword([FromBody] string email)
+        {
+            try
+            {
+                var user = _userRepository.FindByEmail(email.Trim());
 
+                if (user == null) return new ObjectResult(new AppResponse("You are not a user yet.", null, false));
+
+                Random rnd = new Random();
+                var pass =  rnd.Next(5555, 13454).ToString();
+
+                user.Password = pass;
+
+                _userRepository.UpdatePassword(user);
+
+                messageSender.SendEmailAsync(user.Email, "New password", "Your new Password: " + pass);
+                return new ObjectResult(new AppResponse("A new Password was sent to your email.", null, true));
+
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, new AppResponse("Oops.. An Error Occurred!", e, true));
+            }
+        }
         [HttpPost("profileImage/{id}")]
         [Route("profileImage/")]
         [Authorize]

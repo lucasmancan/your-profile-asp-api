@@ -125,7 +125,7 @@ namespace aspApi.Repositories
 
         }
 
-        string GetMd5Hash(string input)
+       public string GetMd5Hash(string input)
         {
             using (MD5 encoder = MD5.Create())
             {
@@ -141,6 +141,15 @@ namespace aspApi.Repositories
                 return value.ToString();
             }
 
+        }
+
+        public void UpdatePassword(User user) {
+
+            var _user = _contexto.Users.Find(user.Id);
+
+            _user.Password = GetMd5Hash(user.Password);
+
+            _contexto.SaveChanges();
         }
 
         public IEnumerable<User> GetAll()
@@ -202,8 +211,6 @@ namespace aspApi.Repositories
                 throw ex;
             }
         }
-
-
     }
 
 }

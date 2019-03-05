@@ -27,5 +27,7 @@ namespace aspApi.Repositories
         Task uploadCoverImage(int userId, string image);
 
         Task uploadProfileImage(int userId, string image);
+
+        void UpdatePassword(User user);
     }
 }

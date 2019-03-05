@@ -47,7 +47,7 @@ namespace aspApi.Models
         public string ProfileImage { get; set; }
         [Column("password")]
         [JsonPropertyAttribute(PropertyName = "password")]
-
+        [JsonIgnore]
         public string Password { get; set; }
         [Column("age")]
         [JsonPropertyAttribute(PropertyName = "age")]
