@@ -6,18 +6,26 @@ using System.Threading.Tasks;
 
 namespace aspApi.Repositories
 {
-  public interface IUserRepository
-{
-    void Add(User user);
+    public interface IUserRepository
+    {
+        User Add(User user);
 
-    IEnumerable<User> GetAll();
+        IEnumerable<User> GetAll();
 
-    User Find(int? id);
+        User Find(int? id);
 
-    User Authenticate(string email);
+        User FindByEmail(string email);
 
-    void Remove(int id);
+        string Authenticate(Credentials credentials);
 
-    void Update(User user);
-}
+        string createToken(User user);
+
+        void Remove(int id);
+
+        void Update(User user);
+
+        Task uploadCoverImage(int userId, string image);
+
+        Task uploadProfileImage(int userId, string image);
+    }
 }

@@ -11,21 +11,46 @@ namespace aspApi.Models
 {
     [Table("phones")]
     public class Phone
-{
-[Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [JsonPropertyAttribute(PropertyName = "id")]
+        [Column("id")]
 
-    public Nullable<int> id { get; set; }
-    public string phone { get; set; }
+
+        public Nullable<int> Id { get; set; }
+
+        [JsonPropertyAttribute(PropertyName = "phone")]
+        [Column("phone")]
+
+        public string PhoneNumber { get; set; }
 
         [JsonIgnore]
         [ForeignKey("user_id")]
-    public virtual User user{ get; set; }
-    public string ddd { get; set; }
-    public string ddi { get; set; }
+        [JsonPropertyAttribute(PropertyName = "user")]
+        public virtual User User { get; set; }
+
+        [Column("ddd")]
+
+        [JsonPropertyAttribute(PropertyName = "ddd")]
+
+
+        public string DDD { get; set; }
+
+        [JsonPropertyAttribute(PropertyName = "ddi")]
+        [Column("ddi")]
+
+        public string DDI { get; set; }
+
+
         [Column("created_at")]
-        public DateTimeOffset createdAt { get; set; }
+        [JsonPropertyAttribute(PropertyName = "createdAt")]
+
+        public DateTimeOffset CreatedAt { get; set; }
+
+        [JsonPropertyAttribute(PropertyName = "updatedAt")]
+
         [Column("updated_at")]
-        public DateTimeOffset updatedAt { get; set; }
+        public DateTimeOffset UpdatedAt { get; set; }
     }
 }

@@ -8,9 +8,11 @@ using System.Text;
 using System.Threading.Tasks;
 using aspApi.Models;
 using aspApi.Repositories;
+using aspApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace aspApi.Controllers
@@ -20,62 +22,29 @@ namespace aspApi.Controllers
     {
 
         private readonly IConfiguration _configuration;
-        private AppResponse appResponse;
         private readonly IUserRepository _userRepository;
-
-
-        public AuthController(IUserRepository userRepository)
+        private readonly MessageSender messageSender;
+        private readonly IOptions<EmailSettings> _options;
+        public AuthController(IUserRepository userRepository, IOptions<EmailSettings> options)
         {
-            _configuration = configuration;
             _userRepository = userRepository;
+            _options = options;
+            messageSender = new MessageSender(options);
         }
-
 
         [HttpPost]
         [AllowAnonymous]
         public IActionResult Login([FromBody] Credentials credentials)
         {
+            var token = _userRepository.Authenticate(credentials);
 
-            var user = _userRepository.Authenticate(credentials.email);
+            if(token == null) return BadRequest(new AppResponse("Username or password may be incorrect!", null, true));
 
-            if (user == null || (credentials.password != user.password))
-                return BadRequest(new AppResponse("Username or password may be incorrect!", null, true));
+            messageSender.SendEmailAsync(credentials.email, "Welcome again " + credentials.email, "Welcome to your new profile online");
 
-        
-            return Ok(new AppResponse("Welcome to your profile!", createToken(user), true));
+            return Ok(new AppResponse("Welcome to your profile!", _userRepository.Authenticate(credentials), true));
         }
 
-
-   
-
-        bool ValidatePassword(string input, string hash)
-        {
-            string hashOfInput = GetMd5Hash(input);
-
-            StringComparer comparer = StringComparer.OrdinalIgnoreCase;
-
-            return (0 == comparer.Compare(hashOfInput, hash)) ? true : false;
-        }
-
-
-        string GetMd5Hash(string input)
-        {
-
-            using (MD5 encoder = MD5.Create())
-            {
-
-                byte[] data = encoder.ComputeHash(Encoding.UTF8.GetBytes(input + _configuration["SecurityKey"]));
-                StringBuilder value = new StringBuilder();
-
-                for (long i = 0; i < data.Length; i++)
-                {
-                    value.Append(data[i].ToString());
-                }
-
-                return value.ToString();
-            }
-
-        }
 
     }
 }

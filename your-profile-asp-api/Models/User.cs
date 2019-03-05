@@ -1,4 +1,5 @@
 ﻿using aspApi.Utils;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -17,49 +18,73 @@ namespace aspApi.Models
 
         public User()
         {
-            phones = new HashSet<Phone>();
+            Phones = new HashSet<Phone>();
         }
 
         [DatabaseGeneratedAttribute(DatabaseGeneratedOption.Identity)]
+        [JsonPropertyAttribute(PropertyName = "id")]
         [Key, Column("id", Order = 1)]
-        public Nullable<int> id { get; set; }
+        public Nullable<int> Id { get; set; }
+        [JsonPropertyAttribute(PropertyName = "firstName")]
         [Column("first_name")]
-        public string firstName { get; set; }
+        public string FirstName { get; set; }
+        [JsonPropertyAttribute(PropertyName = "lastName")]
         [Column("last_name")]
-        public string lastName { get; set; }
+        public string LastName { get; set; }
+        [JsonPropertyAttribute(PropertyName = "email")]
         [Column("email")]
-        public string email { get; set; }
+        public string Email { get; set; }
+        [JsonPropertyAttribute(PropertyName = "bio")]
+
         [Column("bio")]
-        public string bio { get; set; }
+        public string Bio { get; set; }
         [Column("cover_image")]
-        public string coverImage { get; set; }
+        [JsonPropertyAttribute(PropertyName = "coverImage")]
+        public string CoverImage { get; set; }
         [Column("profile_image")]
-        public string profileImage { get; set; }
+        [JsonPropertyAttribute(PropertyName = "profileImage")]
+
+        public string ProfileImage { get; set; }
         [Column("password")]
-        public string password { get; set; }
+        [JsonPropertyAttribute(PropertyName = "password")]
+
+        public string Password { get; set; }
         [Column("age")]
+        [JsonPropertyAttribute(PropertyName = "age")]
 
-        public Nullable<int> age { get; set; }
+        public Nullable<int> Age { get; set; }
         [Column("active")]
+        [JsonPropertyAttribute(PropertyName = "active")]
 
-        public bool active { get; set; }
+        public bool Active { get; set; }
+        [JsonPropertyAttribute(PropertyName = "gender")]
 
         [Column("gender")]
       
-        public Gender? gender { get; set; }
+        public Gender? Gender { get; set; }
+        [JsonPropertyAttribute(PropertyName = "addressId")]
 
         [ForeignKey("address_id"), Column("address_id")]
-        public int? addressId { get; set; }
-        public virtual Address address { get; set; }
+        public int? AddressId { get; set; }
+        [JsonPropertyAttribute(PropertyName = "address")]
+
+        public virtual Address Address { get; set; }
+        [JsonPropertyAttribute(PropertyName = "birthDate")]
         [Column("birth_date")]
         public DateTimeOffset? BirthDate { get; set; }
+        [JsonPropertyAttribute(PropertyName = "loggedAt")]
+
         [Column("logged_at")]
-        public DateTimeOffset? loggedAt { get; set; }
+        public DateTimeOffset? LoggedAt { get; set; }
+        [JsonPropertyAttribute(PropertyName = "createdAt")]
+
         [Column("created_at")]
-        public DateTimeOffset? createdAt { get; set; }
+        public DateTimeOffset? CreatedAt { get; set; }
         [Column("updated_at")]
-        public DateTimeOffset? updatedAt { get; set; }
-        public virtual ICollection<Phone> phones { get; set; }
+        [JsonPropertyAttribute(PropertyName = "updatedAt")]
+        public DateTimeOffset? UpdatedAt { get; set; }
+        [JsonPropertyAttribute(PropertyName = "phones")]
+        public virtual ICollection<Phone> Phones { get; set; }
 
        
     }

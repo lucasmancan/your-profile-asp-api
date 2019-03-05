@@ -3,8 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using aspApi.Middleware;
 using aspApi.Models;
 using aspApi.Repositories;
+using aspApi.Services;
+using AutoMapper;
+using AutoMapper.EquivalencyExpression;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -28,12 +32,10 @@ namespace aspApi
         public IConfiguration Configuration { get; }
 
 
-        protected  void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        protected void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder
                  .UseLazyLoadingProxies();
-
-
 
             optionsBuilder.EnableSensitiveDataLogging();
             optionsBuilder.UseLoggerFactory(new LoggerFactory().AddConsole((category, level) =>
@@ -47,13 +49,11 @@ namespace aspApi
             services.AddDbContext<UserDbContext>(options =>
             options.UseLazyLoadingProxies()
            .UseSqlServer(Configuration.GetConnectionString("AzureConnection")));
-         
-
-    
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             var key = Encoding.ASCII.GetBytes(Configuration["SecurityKey"]);
+            Console.WriteLine(key);
             services.AddAuthentication(x =>
             {
                 x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -72,10 +72,21 @@ namespace aspApi
                 };
             });
 
-            //services.AddTransient<IUserRepository, UserRepository>();
-            //services.AddTransient<IPhoneRepository, PhoneRepository>();
+            Mapper.Initialize(cfg =>
+            {
+                cfg.AddCollectionMappers();
+                //cfg.SetGeneratePropertyMaps<GenerateEntityFrameworkPrimaryKeyPropertyMaps<UserDbContext>>();
+                // Configuration code
+            });
+
+            services.Configure<EmailSettings>(Configuration.GetSection("EmailSettings"));
+            services.AddTransient<IEmailSender, MessageSender>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IPhoneRepository, PhoneRepository>();
+            services.AddScoped<IStateRepository, StateRepository>();
+            services.AddScoped<ICityRepository, CityRepository>();
+            services.AddScoped<ICountryRepository, CountryRepository>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -89,8 +100,6 @@ namespace aspApi
             {
                 app.UseHsts();
             }
-
-
             // global cors policy
             app.UseCors(x => x
                 .AllowAnyOrigin()
@@ -98,9 +107,15 @@ namespace aspApi
                 .AllowAnyHeader());
 
             app.UseAuthentication();
-
+            app.UseJwtTokenMiddleware();
             app.UseHttpsRedirection();
-            app.UseMvc();
+            app.UseMvc(routes =>
+            {
+                routes.MapRoute(
+                    name: "default",
+                    template: "{controller=Properties}/{action=Search}/{*params}"
+                );
+            });
         }
     }
 }

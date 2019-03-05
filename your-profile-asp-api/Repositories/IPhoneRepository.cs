@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 
 namespace aspApi.Repositories
 {
-    interface IPhoneRepository
+    public interface IPhoneRepository
 {
     void Add(Phone phone);
 
     IEnumerable<Phone> GetAll();
 
-    Phone Find(long id);
+    Phone Find(int? id);
 
-    void Remove(long id);
+    void Remove(int? id);
 
     void Update(Phone phone);
 }

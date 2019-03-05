@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -10,20 +11,30 @@ namespace aspApi.Models
     [Table("cities")]
     public class City
     {
-        [DatabaseGeneratedAttribute(DatabaseGeneratedOption.Identity)]
+        //[DatabaseGeneratedAttribute(DatabaseGeneratedOption.Identity)]
         [Key, Column("id", Order = 1)]
-        public Nullable<int> id { get; set; }
-    public string name { get; set; }
+        [JsonPropertyAttribute(PropertyName = "id")]
 
+        public Nullable<int> Id { get; set; }
+        [JsonPropertyAttribute(PropertyName = "name")]
 
-
+        public string Name { get; set; }
+        [JsonPropertyAttribute(PropertyName = "stateId")]
 
         [ForeignKey("state_id"), Column("state_id")]
-        public int? stateId { get; set; }
-        public virtual State state { get; set; }
+        public int? StateId { get; set; }
+        [JsonPropertyAttribute(PropertyName = "state")]
+
+        public virtual State State { get; set; }
+
+        [JsonPropertyAttribute(PropertyName = "createdAt")]
+
         [Column("created_at")]
-        public DateTimeOffset createdAt { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
+        [JsonPropertyAttribute(PropertyName = "updatedAt")]
+
         [Column("updated_at")]
-        public DateTimeOffset updatedAt { get; set; }
+        public DateTimeOffset UpdatedAt { get; set; }
     }
 }
+    

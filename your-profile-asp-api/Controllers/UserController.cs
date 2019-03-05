@@ -6,6 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Security.Claims;
+using aspApi.Services;
+using Microsoft.Extensions.Options;
 
 namespace aspApi.Controllers
 {
@@ -15,92 +18,139 @@ namespace aspApi.Controllers
     {
 
         private readonly IUserRepository _userRepository;
-        private AppResponse appResponse;
+        private readonly MessageSender messageSender;
 
-        public UserController(IUserRepository userRepository)
+        public UserController(IUserRepository userRepository, IOptions<EmailSettings> options)
         {
             _userRepository = userRepository;
+            messageSender = new MessageSender(options);
         }
 
-        [HttpGet, Authorize]
-        public IEnumerable<User> GetAll()
+        [HttpGet(Name = "GetUser"), Authorize]
+        public IActionResult GetLoggedUser()
         {
-            return _userRepository.GetAll();
-        }
-
-        [HttpGet("{id}", Name = "GetUser")]
-        public IActionResult GetById(int id)
-        {
-            var user = _userRepository.Find(id);
-
-
-            if (user == null)
+            try
             {
-                return NotFound();
+                string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                var user = _userRepository.Find(int.Parse(userId.ToString()));
+
+                if (user == null) return NotFound();
+
+                return new ObjectResult(new AppResponse("Welcome to your profile!", user, true));
+
             }
-
-            appResponse = new AppResponse("Welcome to your profile!", user, true);
-
-            return new ObjectResult(appResponse);
+            catch (Exception e)
+            {
+                return StatusCode(500, new AppResponse("Oops.. An Error Occurred!", e, true));
+            }
         }
 
         [HttpPost]
         [AllowAnonymous]
         public IActionResult Create([FromBody] User user)
         {
+            try
+            {
+                if (user == null) return BadRequest();
 
-            if (user == null) return BadRequest();
+                var _user = _userRepository.FindByEmail(user.Email);
 
-            _userRepository.Add(user);
+                if (_user != null)
+                    return new ObjectResult(new AppResponse("User already exists", null, false));
 
-            appResponse = new AppResponse("Welcome to Your Profile", null, true);
 
-            return new ObjectResult(appResponse);
+                user = _userRepository.Add(user);
 
+                messageSender.SendEmailAsync(user.Email, "Welcome " + user.Email, "Welcome to your new profile online");
+
+                return new ObjectResult(new AppResponse("Welcome to Your Profile", _userRepository.createToken(user), true));
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, new AppResponse("Oops.. An Error Occurred!", e, true));
+            }
         }
+
+
+
+        [HttpPost("coverImage/{id}")]
+        [Route("coverImage/")]
+        [Authorize]
+        public IActionResult UploadProfileImage([FromBody] string image, int id)
+        {
+            try
+            {
+                if (image == null) return BadRequest();
+
+                _userRepository.
+                   uploadProfileImage(id, image);
+
+                return new ObjectResult(new AppResponse("Welcome to Your Profile", null, true));
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, new AppResponse("Oops.. An Error Occurred!", e, true));
+            }
+        }
+
+
+        [HttpPost("profileImage/{id}")]
+        [Route("profileImage/")]
+        [Authorize]
+        public async Task<IActionResult> UploadCoverImage([FromBody] string image, int id)
+        {
+            try
+            {
+                if (image == null) return BadRequest();
+
+                string convert = image.Replace("data:image/png;base64,", String.Empty);
+                convert = image.Replace("data:image/jpeg;base64,", String.Empty);
+
+                //byte[] image64 = Convert.FromBase64String(convert);
+                await _userRepository.uploadProfileImage(id, convert);
+
+                return new ObjectResult(new AppResponse("Welcome to Your Profile", null, true));
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, new AppResponse("Oops.. An Error Occurred!", e, true));
+            }
+        }
+
 
         [HttpPut, Authorize]
         public IActionResult Update([FromBody] User user)
         {
             try
             {
-                var _user = _userRepository.Find(user.id);
-                if (_user == null) return NotFound();
+                if (user == null) return BadRequest();
 
-                _user.firstName = user.firstName;
-                _user.lastName = user.lastName;
-                _user.gender = user.gender;
-                _user.BirthDate = user.BirthDate;
-                _user.updatedAt = DateTimeOffset.Now;
-                _user.address = user.address;
-                _userRepository.Update(_user);
+                _userRepository.Update(user);
 
-                appResponse = new AppResponse("Profile Updated!", null, true);
-                return new ObjectResult(appResponse);
-
+                return new ObjectResult(new AppResponse("Profile Updated!", null, true));
             }
             catch (Exception e)
             {
-                appResponse = new AppResponse("Oops.. An Error Occurred!", e, true);
-                return StatusCode(500);
+                return StatusCode(500, new AppResponse("Oops.. An Error Occurred!", e, true));
             }
         }
 
         [HttpDelete("{id}"), Authorize]
         public IActionResult Delete(int id)
         {
+            try
+            {
+                var _user = _userRepository.Find(id);
+                if (_user == null) return NotFound();
+                _userRepository.Remove(id);
 
-            var _user = _userRepository.Find(id);
-
-
-            if (_user == null) return NotFound();
-
-            _userRepository.Remove(id);
-
-            appResponse = new AppResponse("User Deleted!", null, true);
-
-            return new ObjectResult(appResponse);
-
+                return new ObjectResult(new AppResponse("User Deleted!", null, true));
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, new AppResponse("Oops.. An Error Occurred!", e, true));
+            }
         }
     }
 }

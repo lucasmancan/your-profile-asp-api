@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -12,18 +13,34 @@ namespace aspApi.Models
     {
         [DatabaseGeneratedAttribute(DatabaseGeneratedOption.Identity)]
         [Key, Column("id", Order = 1)]
-        public Nullable<int> id { get; set; }
-        public string street { get; set; }
+        [JsonPropertyAttribute(PropertyName = "id")]
+        public int Id { get; set; }
+        [Column("street")]
+        [JsonPropertyAttribute(PropertyName = "street")]
+        public string Street { get; set; }
         [Column("zip_code")]
-        public string zipCode { get; set; }
-        public string neighborhood { get; set; }
-        public string number { get; set; }
+        [JsonPropertyAttribute(PropertyName = "zipCode")]
+        public string ZipCode { get; set; }
+        [Column("neighborhood")]
+        [JsonPropertyAttribute(PropertyName = "neighborhood")]
+
+        public string Neighborhood { get; set; }
+        [Column("number")]
+        [JsonPropertyAttribute(PropertyName = "number")]
+
+        public string Number { get; set; }
+        [JsonPropertyAttribute(PropertyName = "cityId")]
+
         [ForeignKey("city_id"), Column("city_id")]
-        public int? cityId { get; set; }
-        public virtual City city { get; set; }
+        public int? CityId { get; set; }
+        public virtual City City { get; set; }
+        [JsonPropertyAttribute(PropertyName = "createdAt")]
+
         [Column("created_at")]
-        public DateTimeOffset createdAt { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
+        [JsonPropertyAttribute(PropertyName = "updatedAt")]
+
         [Column("updated_at")]
-        public DateTimeOffset updatedAt { get; set; }
+        public DateTimeOffset UpdatedAt { get; set; }
     }
 }

@@ -20,9 +20,9 @@ namespace aspApi.Repositories
         _contexto.SaveChanges();
     }
 
-    public Phone Find(long id)
+    public Phone Find(int? id)
     {
-        return _contexto.Phones.FirstOrDefault(u => u.id == id);
+        return _contexto.Phones.FirstOrDefault(u => u.Id == id);
     }
 
     public IEnumerable<Phone> GetAll()
@@ -30,9 +30,9 @@ namespace aspApi.Repositories
         return _contexto.Phones.ToList();
     }
 
-    public void Remove(long id)
+    public void Remove(int? id)
     {
-        var entity = _contexto.Phones.First(u => u.id == id);
+        var entity = _contexto.Phones.First(u => u.Id == id);
         _contexto.Phones.Remove(entity);
         _contexto.SaveChanges();
     }

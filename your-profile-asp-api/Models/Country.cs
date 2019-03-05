@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -10,13 +11,22 @@ namespace aspApi.Models
     [Table("countries")]
     public class Country
 {
-        [DatabaseGeneratedAttribute(DatabaseGeneratedOption.Identity)]
+        //[DatabaseGeneratedAttribute(DatabaseGeneratedOption.Identity)]
         [Key, Column("id", Order = 1)]
-        public Nullable<int> id { get; set; }
-    public string name { get; set; }
+        [JsonPropertyAttribute(PropertyName = "id")]
+
+        public Nullable<int> Id { get; set; }
+        [JsonPropertyAttribute(PropertyName = "name")]
+        [Column("name")]
+
+        public string Name { get; set; }
+        [JsonPropertyAttribute(PropertyName = "createdAt")]
+
         [Column("created_at")]
-        public DateTimeOffset createdAt { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
+        [JsonPropertyAttribute(PropertyName = "updatedAt")]
+
         [Column("updated_at")]
-        public DateTimeOffset updatedAt { get; set; }
+        public DateTimeOffset UpdatedAt { get; set; }
     }
 }
