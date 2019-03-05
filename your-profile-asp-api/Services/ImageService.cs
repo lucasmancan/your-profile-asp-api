@@ -21,9 +21,7 @@ namespace aspApi.Services
             _config = config;
         }
 
-     
-
-
+    
         public async Task<string> SaveFile(AppImage appImage)
         {
             CloudStorageAccount account = CloudStorageAccount.Parse(_config["StorageAccount:BlobConnection"]);
